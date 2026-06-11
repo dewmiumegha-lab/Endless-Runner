@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>DASH — Endless Runner</title>
-<link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#A855F7"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="DASH"/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#A855F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DASH">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:        #F0E6FF;
@@ -22,696 +22,1116 @@
   --purple:    #8B5CF6;
   --green:     #10B981;
   --pink:      #EC4899;
+  --sky:       #38BDF8;
+  --mint:      #34D399;
+  --peach:     #FB923C;
+  --text:      #2D1B69;
+  --muted:     rgba(109,40,217,0.5);
+  --glass:     rgba(255,255,255,0.7);
+  --r-lg:      20px;
+  --r-xl:      28px;
+  --r-pill:    50px;
+  --shadow-btn: 0 6px 0 rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
+  --shadow-card: 0 8px 32px rgba(139,92,246,0.15), 0 2px 8px rgba(0,0,0,0.08);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-body {
-  background: var(--bg);
-  font-family: 'Inter', sans-serif;
-  overflow: hidden;
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; overflow:hidden; background:#C4B5FD; }
+body { display:flex; justify-content:center; align-items:center; font-family:'Inter',sans-serif; }
+
+/* ── CONTAINER ── */
 #app {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  background: #000;
-  box-shadow: 0 0 40px rgba(139,92,246,0.3);
-}
-
-/* ══ SCREEN MANAGEMENT ══ */
-.screen {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  display: none;
-  flex-direction: column;
-  padding: 24px;
-  z-index: 10;
-}
-.screen.active { display: flex; }
-
-/* ══ BACKGROUND VIDEO / CANVAS AREA ══ */
-#canvasWrapper {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 1;
-}
-canvas { width: 100%; height: 100%; display: block; }
-
-/* ══ HOME SCREEN ══ */
-#scrHome {
-  background: linear-gradient(135deg, #FAF5FF 0%, #E8D5FF 100%);
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-}
-.brand-area { margin-top: auto; }
-.logo-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 84px;
-  line-height: 0.85;
-  background: linear-gradient(135deg, var(--neon), var(--neon2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 2px;
-}
-.logo-sub {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--purple);
-  text-transform: uppercase;
-  letter-spacing: 6px;
-  margin-top: 8px;
-}
-.menu-buttons {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 40px;
-  margin-bottom: auto;
-}
-.btn {
-  background: var(--card);
-  border: 2px solid var(--border);
-  padding: 16px 28px;
-  border-radius: 16px;
-  font-weight: 800;
-  font-size: 16px;
-  color: #1e1b4b;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  box-shadow: 0 8px 0 var(--surface);
-  transform: translateY(-4px);
-  transition: all 0.1s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.btn:active {
-  transform: translateY(0px);
-  box-shadow: 0 0px 0 var(--surface);
-}
-.btn-main {
-  background: linear-gradient(135deg, var(--neon), var(--purple));
-  color: white;
-  border: none;
-  box-shadow: 0 8px 0 #6d28d9;
-}
-.btn-main:active { box-shadow: 0 0px 0 #6d28d9; }
-
-/* ══ SHOP SCREEN ══ */
-#scrShop {
-  background: #FAF5FF;
-  z-index: 20;
-}
-.shop-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.shop-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--purple); }
-.currency-display {
-  background: var(--surface);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 800;
-  color: var(--gold);
-}
-.shop-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.tab-btn {
-  flex: 1;
-  padding: 10px;
-  border-radius: 12px;
-  border: none;
-  background: var(--surface);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--purple);
-  cursor: pointer;
-}
-.tab-btn.active {
-  background: var(--neon);
-  color: white;
-}
-.shop-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  overflow-y: auto;
-  padding-bottom: 20px;
-}
-.shop-item {
-  background: white;
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  aspect-ratio: 1 / 1;
-}
-.item-ico { font-size: 32px; margin-bottom: 4px; }
-.item-nm { font-weight: 800; font-size: 13px; color: #1e1b4b; margin-bottom: 2px; }
-.item-pr { font-weight: 700; font-size: 12px; color: var(--gold); margin-bottom: 8px; }
-.btn-buy {
-  width: 100%;
-  padding: 6px;
-  font-size: 11px;
-  font-weight: 800;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-/* ══ HUD (GAME PLAY) ══ */
-#hud {
-  position: absolute;
-  top: 0; left: 0; width: 100%;
-  padding: 20px;
-  z-index: 5;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.hud-box {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.4);
-  padding: 8px 16px;
-  border-radius: 16px;
-  font-weight: 900;
-  font-size: 15px;
-  color: #1e1b4b;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(139,92,246,0.1);
-}
-#hudRight { display: flex; gap: 8px; pointer-events: auto; }
-.btn-pause { width: 36px; height: 36px; border-radius: 12px; padding: 0; box-shadow: 0 4px 0 var(--surface); transform: translateY(-2px); }
-
-/* ══ OVERLAYS (PAUSE & GAME OVER) ══ */
-.overlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(26, 21, 44, 0.85);
-  backdrop-filter: blur(12px);
-  z-index: 30;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 32px;
-}
-.overlay-card {
-  background: white;
-  width: 100%;
-  max-width: 360px;
-  border-radius: 28px;
-  padding: 32px 24px;
-  text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-}
-.overlay-title { font-family: 'Bebas Neue', sans-serif; font-size: 48px; margin-bottom: 20px; }
-#popPause .overlay-title { color: var(--purple); }
-#popGameOver .overlay-title { color: var(--neon2); }
-.stats-group {
+  width:390px; height:844px;
+  position:relative; overflow:hidden;
+  border-radius:44px;
+  box-shadow: 0 0 0 1px rgba(168,85,247,0.3), 0 40px 120px rgba(139,92,246,0.4), 0 0 80px rgba(236,72,153,0.15);
   background: var(--bg);
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
-.stat-row { display: flex; justify-content: space-between; font-weight: 700; color: #1e1b4b; }
-.stat-val { font-weight: 900; color: var(--purple); }
 
-/* ══ TOAST NOTIFICATION ══ */
-#toast {
-  position: absolute;
-  bottom: 30px; left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #1e1b4b;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  z-index: 100;
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  pointer-events: none;
-  white-space: nowrap;
+/* ── SCREENS ── */
+.screen { position:absolute; inset:0; display:none; flex-direction:column; overflow:hidden; }
+.screen.active { display:flex; }
+
+/* ═══════════════════════ SPLASH ═══════════════════════ */
+#splashScreen {
+  background: linear-gradient(160deg, #F0E6FF 0%, #FFE4F0 40%, #E0F2FF 100%);
+  align-items:center; justify-content:center;
 }
-#toast.show { transform: translateX(-50%) translateY(0); }
+.splash-bg-glow {
+  position:absolute; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse 300px 200px at 50% 35%, rgba(168,85,247,0.15) 0%, transparent 70%);
+}
+.splash-grid {
+  position:absolute; inset:0; pointer-events:none; overflow:hidden;
+  background-image: linear-gradient(rgba(168,85,247,0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(168,85,247,0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 80%);
+}
+.splash-content { position:relative; z-index:2; text-align:center; }
+.splash-icon {
+  width:100px; height:100px; background:linear-gradient(135deg,#A855F7,#EC4899);
+  border-radius:28px; display:flex; align-items:center; justify-content:center;
+  font-size:50px; margin:0 auto 32px;
+  box-shadow: 0 8px 0 rgba(168,85,247,0.4), 0 12px 32px rgba(168,85,247,0.3);
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.splash-game-label {
+  font-size:12px; letter-spacing:6px; color:var(--purple); font-weight:700;
+  text-transform:uppercase; margin-bottom:8px;
+}
+.splash-title {
+  font-family:'Bebas Neue',sans-serif; font-size:80px; line-height:0.9;
+  color:var(--text); letter-spacing:4px;
+}
+.splash-title em { color:var(--purple); font-style:normal; }
+.splash-tagline { color:var(--muted); font-size:13px; letter-spacing:3px; margin:16px 0 48px; text-transform:uppercase; }
+.splash-play {
+  background:linear-gradient(135deg,#A855F7,#EC4899);
+  color:white; border:none; padding:18px 56px; border-radius:var(--r-pill);
+  font-size:16px; font-weight:900; cursor:pointer; letter-spacing:2px; text-transform:uppercase;
+  box-shadow: 0 8px 0 rgba(139,46,180,0.5), 0 12px 32px rgba(168,85,247,0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.splash-play:active { transform:translateY(4px); box-shadow:0 4px 0 rgba(139,46,180,0.5), 0 6px 16px rgba(168,85,247,0.3); }
+.splash-version { color:var(--muted); font-size:11px; letter-spacing:2px; margin-top:20px; }
 
-/* ══ LEADERBOARD ══ */
-.lb-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.lb-row { display: flex; align-items: center; background: white; padding: 12px; border-radius: 14px; border: 1px solid var(--border); }
-.lb-row.lb-you { background: var(--surface); border-color: var(--neon); }
-.lb-rank { font-weight: 900; width: 30px; color: var(--purple); }
-.lb-ava { margin-right: 12px; font-size: 20px; }
-.lb-info { flex: 1; text-align: left; }
-.lb-info-name { font-weight: 800; font-size: 14px; }
-.lb-info-sub { font-size: 11px; color: var(--neon); font-weight: 600; }
-.lb-score { font-weight: 900; color: #1e1b4b; }
+/* ═══════════════════════ MENU ═══════════════════════ */
+#menuScreen {
+  background: linear-gradient(160deg, #F0E6FF 0%, #FFE4F0 50%, #E0F2FF 100%);
+}
+.menu-topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:56px 24px 0;
+}
+.menu-logo { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--purple); letter-spacing:3px; text-shadow: 0 3px 0 rgba(139,92,246,0.3); }
+.menu-coin-pill {
+  background:linear-gradient(135deg,#FEF3C7,#FDE68A); border:2px solid rgba(245,158,11,0.4);
+  border-radius:var(--r-pill); padding:8px 16px;
+  display:flex; align-items:center; gap:6px;
+  box-shadow: 0 4px 0 rgba(180,110,0,0.25), 0 2px 8px rgba(245,158,11,0.2);
+}
+.menu-coin-pill span { color:#92400E; font-weight:800; font-size:15px; }
+.menu-hero { text-align:center; padding:24px 0 16px; }
+.menu-char-wrap {
+  width:110px; height:110px; margin:0 auto 16px;
+  background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(236,72,153,0.15));
+  border:3px solid rgba(168,85,247,0.3); border-radius:32px;
+  display:flex; align-items:center; justify-content:center; font-size:60px;
+  box-shadow: 0 8px 0 rgba(168,85,247,0.2), 0 4px 16px rgba(168,85,247,0.15);
+}
+.menu-best { color:var(--muted); font-size:13px; }
+.menu-best strong { color:#92400E; font-size:16px; margin-left:8px; }
+.menu-actions { padding:8px 20px 0; display:flex; flex-direction:column; gap:12px; }
+.mnu-btn {
+  width:100%; padding:18px 24px; border:none; border-radius:var(--r-lg);
+  font-size:16px; font-weight:800; cursor:pointer; letter-spacing:0.5px;
+  display:flex; align-items:center; gap:14px; text-align:left;
+  transition: transform 0.1s, box-shadow 0.1s;
+  position:relative; overflow:hidden;
+}
+.mnu-btn:active { transform:translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2) !important; }
+.mnu-btn-icon { font-size:22px; width:40px; height:40px; background:rgba(255,255,255,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.mnu-btn-text { flex:1; }
+.mnu-btn-text span { display:block; font-size:11px; font-weight:600; opacity:0.75; margin-top:1px; }
+.mnu-btn-arrow { font-size:18px; opacity:0.7; }
+.btn-play-main { background:linear-gradient(135deg,#A855F7,#7C3AED); color:white; box-shadow: 0 6px 0 #5B21B6, 0 8px 20px rgba(168,85,247,0.4); }
+.btn-shop-main { background:linear-gradient(135deg,#F43F8E,#DB2777); color:white; box-shadow: 0 6px 0 #9D174D, 0 8px 20px rgba(244,63,142,0.4); }
+.btn-lb-main   { background:linear-gradient(135deg,#F59E0B,#D97706); color:white; box-shadow: 0 6px 0 #92400E, 0 8px 20px rgba(245,158,11,0.4); }
+.btn-set-main  { background:linear-gradient(135deg,#38BDF8,#0EA5E9); color:white; box-shadow: 0 6px 0 #0369A1, 0 8px 20px rgba(56,189,248,0.4); }
+.menu-bottom { padding:20px 24px 0; text-align:center; }
+
+/* ═══════════════════════ GAME ═══════════════════════ */
+#gameScreen { background:var(--bg); }
+#gameCanvas { position:absolute; inset:0; width:100%; height:100%; }
+.game-hud {
+  position:absolute; top:0; left:0; right:0; z-index:10;
+  padding:52px 20px 20px;
+  background:linear-gradient(180deg,rgba(240,230,255,0.92) 0%,transparent 100%);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.hud-pause-btn {
+  width:40px; height:40px; background:white;
+  border:2px solid rgba(168,85,247,0.3); border-radius:12px;
+  color:var(--purple); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 4px 0 rgba(168,85,247,0.25);
+}
+.hud-center-block { text-align:center; }
+.hud-dist-val { font-family:'Bebas Neue',sans-serif; font-size:38px; color:var(--text); letter-spacing:2px; line-height:1; }
+.hud-dist-lbl { font-size:10px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+.hud-coin-pill {
+  background:linear-gradient(135deg,#FEF3C7,#FDE68A); border:2px solid rgba(245,158,11,0.35);
+  border-radius:var(--r-pill); padding:7px 14px;
+  display:flex; align-items:center; gap:6px;
+  box-shadow: 0 4px 0 rgba(180,110,0,0.2);
+}
+.hud-coin-pill span { color:#92400E; font-weight:800; font-size:15px; }
+.hud-progress {
+  position:absolute; top:48px; left:0; right:0; height:4px;
+  background:rgba(168,85,247,0.15); z-index:11;
+}
+.hud-progress-fill { height:100%; background:linear-gradient(90deg,#A855F7,#EC4899); transition:width 0.1s; border-radius:2px; }
+.game-controls {
+  position:absolute; bottom:48px; left:0; right:0; z-index:10;
+  display:flex; justify-content:space-between; padding:0 36px; gap:20px;
+}
+.game-ctrl {
+  flex:1; height:64px; border:none; border-radius:20px;
+  font-size:15px; font-weight:900; cursor:pointer; letter-spacing:1.5px;
+  text-transform:uppercase;
+  transition:transform 0.1s, box-shadow 0.1s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.game-ctrl:active { transform:translateY(4px); }
+.ctrl-jump {
+  background:linear-gradient(135deg,#A855F7,#7C3AED);
+  color:white;
+  box-shadow: 0 6px 0 #5B21B6, 0 8px 20px rgba(168,85,247,0.5);
+}
+.ctrl-jump:active { box-shadow: 0 2px 0 #5B21B6, 0 4px 10px rgba(168,85,247,0.3); }
+.ctrl-slide {
+  background:linear-gradient(135deg,#F43F8E,#DB2777);
+  color:white;
+  box-shadow: 0 6px 0 #9D174D, 0 8px 20px rgba(244,63,142,0.5);
+}
+.ctrl-slide:active { box-shadow: 0 2px 0 #9D174D, 0 4px 10px rgba(244,63,142,0.3); }
+
+/* ═══════════════════════ PAUSE ═══════════════════════ */
+#pauseScreen {
+  background:rgba(240,230,255,0.85);
+  backdrop-filter:blur(16px); justify-content:center; align-items:center;
+}
+.pause-sheet {
+  background:white; border:2px solid rgba(168,85,247,0.2);
+  border-radius:var(--r-xl); padding:36px 28px; width:320px;
+  box-shadow: 0 20px 60px rgba(168,85,247,0.2), 0 8px 24px rgba(0,0,0,0.08);
+}
+.pause-top { text-align:center; margin-bottom:24px; }
+.pause-top h2 { font-family:'Bebas Neue',sans-serif; font-size:42px; color:var(--purple); letter-spacing:4px; }
+.pause-stats-row { display:flex; gap:12px; margin-bottom:24px; }
+.pause-stat-card {
+  flex:1; background:linear-gradient(135deg,#F5F0FF,#EDE9FE); border-radius:14px; padding:14px;
+  text-align:center; border:2px solid rgba(168,85,247,0.2);
+  box-shadow: 0 4px 0 rgba(168,85,247,0.15);
+}
+.pause-stat-val { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--text); letter-spacing:1px; }
+.pause-stat-lbl { font-size:10px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+.pause-btns { display:flex; flex-direction:column; gap:10px; }
+.p-btn {
+  width:100%; padding:16px; border:none; border-radius:14px;
+  font-size:15px; font-weight:800; cursor:pointer; letter-spacing:0.5px;
+  transition:transform 0.1s, box-shadow 0.1s;
+}
+.p-btn:active { transform:translateY(3px); }
+.p-btn-resume { background:linear-gradient(135deg,#A855F7,#7C3AED); color:white; box-shadow: 0 5px 0 #5B21B6; }
+.p-btn-resume:active { box-shadow: 0 2px 0 #5B21B6; }
+.p-btn-restart { background:linear-gradient(135deg,#F5F0FF,#EDE9FE); color:var(--text); border:2px solid rgba(168,85,247,0.2); box-shadow: 0 4px 0 rgba(168,85,247,0.15); }
+.p-btn-home   { background:linear-gradient(135deg,#FFF0F9,#FFE4F0); color:var(--text); border:2px solid rgba(244,63,142,0.2); box-shadow: 0 4px 0 rgba(244,63,142,0.15); }
+.pause-divider { height:1px; background:rgba(168,85,247,0.15); margin:16px 0; }
+.pause-sound-row { display:flex; justify-content:space-between; align-items:center; }
+.pause-sound-row span { color:var(--muted); font-size:14px; }
+
+/* ═══════════════════════ GAME OVER ═══════════════════════ */
+#gameOverScreen {
+  background: linear-gradient(160deg, #FFE4F0 0%, #F0E6FF 50%, #E0F9F5 100%);
+  align-items:center; justify-content:center;
+}
+.over-sheet {
+  background:white; border:2px solid rgba(244,63,142,0.2);
+  border-radius:var(--r-xl); padding:36px 28px; width:330px;
+  position:relative;
+  box-shadow: 0 20px 60px rgba(244,63,142,0.2), 0 8px 24px rgba(0,0,0,0.08);
+}
+.over-neon-line {
+  position:absolute; top:0; left:40px; right:40px; height:3px;
+  background:linear-gradient(90deg,transparent,#F43F8E,transparent);
+  border-radius:2px;
+}
+.over-title { font-family:'Bebas Neue',sans-serif; font-size:48px; color:#F43F8E; letter-spacing:4px; text-align:center; }
+.over-sub { text-align:center; color:var(--muted); font-size:13px; margin-bottom:24px; }
+.over-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.over-stat-card {
+  background:linear-gradient(135deg,#FFF0F9,#FFE4F0); border-radius:14px; padding:16px 12px;
+  text-align:center; border:2px solid rgba(244,63,142,0.15);
+  box-shadow: 0 4px 0 rgba(244,63,142,0.12);
+}
+.over-stat-val { font-family:'Bebas Neue',sans-serif; font-size:30px; color:var(--text); letter-spacing:1px; }
+.over-stat-lbl { font-size:10px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+.over-best-row {
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7); border:2px solid rgba(245,158,11,0.25);
+  border-radius:12px; padding:12px 16px;
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
+  box-shadow: 0 3px 0 rgba(180,110,0,0.15);
+}
+.over-best-row span { color:var(--muted); font-size:13px; }
+.over-best-row strong { color:#92400E; font-size:16px; font-weight:900; }
+.over-stars { text-align:center; font-size:36px; margin-bottom:20px; letter-spacing:4px; }
+.over-btns { display:flex; flex-direction:column; gap:10px; }
+.over-btn-row { display:flex; gap:10px; }
+.o-btn {
+  flex:1; padding:15px 10px; border:none; border-radius:14px;
+  font-size:14px; font-weight:800; cursor:pointer; letter-spacing:0.5px;
+  transition:transform 0.1s, box-shadow 0.1s;
+}
+.o-btn:active { transform:translateY(3px); }
+.o-btn-again { background:linear-gradient(135deg,#F43F8E,#DB2777); color:white; box-shadow: 0 5px 0 #9D174D; }
+.o-btn-again:active { box-shadow: 0 2px 0 #9D174D; }
+.o-btn-home  { background:linear-gradient(135deg,#F5F0FF,#EDE9FE); color:var(--text); border:2px solid rgba(168,85,247,0.2); box-shadow: 0 4px 0 rgba(168,85,247,0.15); }
+.o-btn-share { background:linear-gradient(135deg,#A855F7,#7C3AED); color:white; box-shadow: 0 4px 0 #5B21B6; }
+
+/* ═══════════════════════ SHOP ═══════════════════════ */
+#shopScreen { background:linear-gradient(160deg, #F0E6FF 0%, #FFE4F0 60%, #E0F2FF 100%); }
+.shop-header {
+  padding:52px 20px 20px;
+  background:linear-gradient(180deg,rgba(240,230,255,0.98) 70%,transparent);
+  display:flex; align-items:center; gap:14px;
+}
+.hdr-back {
+  width:40px; height:40px; background:white;
+  border:2px solid rgba(168,85,247,0.25); border-radius:12px;
+  color:var(--purple); font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 4px 0 rgba(168,85,247,0.2);
+}
+.hdr-title { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--text); letter-spacing:3px; flex:1; }
+.hdr-coin-pill {
+  background:linear-gradient(135deg,#FEF3C7,#FDE68A); border:2px solid rgba(245,158,11,0.35);
+  border-radius:var(--r-pill); padding:7px 14px;
+  display:flex; align-items:center; gap:5px;
+  box-shadow: 0 3px 0 rgba(180,110,0,0.2);
+}
+.hdr-coin-pill span { color:#92400E; font-weight:800; font-size:14px; }
+.shop-tabs-wrap { padding:0 20px 12px; display:flex; gap:8px; }
+.s-tab {
+  padding:8px 18px; border-radius:var(--r-pill); border:2px solid rgba(168,85,247,0.2);
+  font-size:13px; font-weight:700; cursor:pointer; background:white;
+  color:var(--muted); transition:all 0.15s;
+  box-shadow: 0 3px 0 rgba(168,85,247,0.12);
+}
+.s-tab.on { background:linear-gradient(135deg,#A855F7,#7C3AED); color:white; border-color:#A855F7; box-shadow: 0 4px 0 #5B21B6; }
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px 20px; overflow-y:auto; flex:1; }
+.s-item {
+  background:white; border:2px solid rgba(168,85,247,0.15);
+  border-radius:var(--r-lg); padding:16px 14px; text-align:center;
+  position:relative; transition:border-color 0.2s;
+  box-shadow: 0 4px 12px rgba(168,85,247,0.1);
+}
+.s-item.s-equipped { border-color:rgba(168,85,247,0.5); background:linear-gradient(135deg,#F5F0FF,#EDE9FE); }
+.s-on-badge {
+  position:absolute; top:10px; right:10px;
+  background:linear-gradient(135deg,#A855F7,#7C3AED); color:white;
+  font-size:9px; font-weight:900; padding:3px 7px; border-radius:6px; letter-spacing:1px;
+}
+.s-icon { font-size:42px; margin-bottom:10px; display:block; }
+.s-name { font-size:13px; font-weight:800; color:var(--text); margin-bottom:3px; }
+.s-bonus { font-size:11px; color:var(--muted); margin-bottom:12px; }
+.s-buy-btn {
+  width:100%; padding:9px 4px; border:none; border-radius:10px;
+  font-size:12px; font-weight:800; cursor:pointer; letter-spacing:0.5px;
+  transition:transform 0.1s, box-shadow 0.1s;
+}
+.s-buy-btn:active { transform:translateY(2px); }
+.s-btn-buy     { background:linear-gradient(135deg,#F43F8E,#DB2777); color:white; box-shadow: 0 4px 0 #9D174D; }
+.s-btn-equip   { background:linear-gradient(135deg,#A855F7,#7C3AED); color:white; box-shadow: 0 4px 0 #5B21B6; }
+.s-btn-eq      { background:linear-gradient(135deg,#F5F0FF,#EDE9FE); color:var(--purple); border:2px solid rgba(168,85,247,0.3); cursor:default; }
+.s-btn-lock    { background:#F3F4F6; color:#9CA3AF; border:2px solid #E5E7EB; cursor:not-allowed; }
+
+/* ═══════════════════════ LEADERBOARD ═══════════════════════ */
+#leaderboardScreen { background:linear-gradient(160deg, #FFFBEB 0%, #FEF3C7 30%, #F0E6FF 100%); }
+.lb-header {
+  padding:52px 20px 20px;
+  background:linear-gradient(180deg,rgba(255,251,235,0.98) 70%,transparent);
+  display:flex; align-items:center; gap:14px;
+}
+.lb-podium-wrap {
+  padding:8px 20px 20px;
+  background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03));
+  border-bottom:2px solid rgba(245,158,11,0.15);
+}
+.lb-podium { display:flex; align-items:flex-end; justify-content:center; gap:12px; }
+.pod-item { text-align:center; }
+.pod-emoji { font-size:28px; margin-bottom:6px; }
+.pod-block {
+  border-radius:10px 10px 0 0; display:flex; align-items:center;
+  justify-content:center; font-weight:900; font-size:20px;
+}
+.pod-1 { background:linear-gradient(180deg,#FDE68A,#F59E0B); width:88px; height:80px; color:#78350F; box-shadow: 0 6px 0 #92400E; }
+.pod-2 { background:linear-gradient(180deg,#E2E8F0,#CBD5E1); width:76px; height:62px; color:#374151; box-shadow: 0 5px 0 #6B7280; }
+.pod-3 { background:linear-gradient(180deg,#FED7AA,#FB923C); width:76px; height:48px; color:#7C2D12; box-shadow: 0 4px 0 #C2410C; }
+.pod-name { font-size:11px; color:var(--muted); font-weight:700; margin-top:4px; }
+.lb-list { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:8px; }
+.lb-row {
+  display:flex; align-items:center; gap:12px;
+  background:white; border:2px solid rgba(168,85,247,0.12);
+  border-radius:14px; padding:14px 16px;
+  box-shadow: 0 3px 8px rgba(168,85,247,0.08);
+}
+.lb-row.lb-you { border-color:rgba(245,158,11,0.4); background:linear-gradient(135deg,#FFFBEB,#FEF3C7); }
+.lb-rank { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--muted); width:22px; }
+.lb-ava { font-size:26px; }
+.lb-info { flex:1; }
+.lb-info-name { font-size:14px; font-weight:800; color:var(--text); }
+.lb-info-sub { font-size:11px; color:var(--muted); }
+.lb-score { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#F43F8E; letter-spacing:1px; }
+
+/* ═══════════════════════ SETTINGS ═══════════════════════ */
+#settingsScreen { background:linear-gradient(160deg, #E0F2FF 0%, #F0E6FF 50%, #FFE4F0 100%); }
+.set-header {
+  padding:52px 20px 20px;
+  background:linear-gradient(180deg,rgba(224,242,255,0.98) 70%,transparent);
+  display:flex; align-items:center; gap:14px;
+}
+.set-body { flex:1; overflow-y:auto; padding:12px 20px 32px; display:flex; flex-direction:column; gap:12px; }
+.set-section-lbl { font-size:11px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; padding:4px 0; }
+.set-card { background:white; border:2px solid rgba(168,85,247,0.15); border-radius:var(--r-lg); overflow:hidden; box-shadow: 0 4px 12 rgba(168,85,247,0.08); }
+.set-row { display:flex; align-items:center; gap:14px; padding:16px 20px; border-bottom:1px solid rgba(168,85,247,0.1); }
+.set-row:last-child { border-bottom:none; }
+.set-row-icon { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ic-sound { background:rgba(56,189,248,0.15); }
+.ic-music { background:rgba(168,85,247,0.15); }
+.ic-notif { background:rgba(244,63,142,0.15); }
+.ic-lock  { background:rgba(16,185,129,0.15); }
+.ic-star  { background:rgba(245,158,11,0.15); }
+.set-row-name { flex:1; font-size:15px; font-weight:700; color:var(--text); }
+.set-row-sub { font-size:11px; color:var(--muted); }
+.tog { width:50px; height:28px; border-radius:14px; position:relative; cursor:pointer; background:#E5E7EB; transition:background 0.2s; }
+.tog.on { background:var(--neon); }
+.tog-hand { width:22px; height:22px; background:white; border-radius:50px; position:absolute; top:3px; left:3px; box-shadow:0 2px 4px rgba(0,0,0,0.15); transition:left 0.2s; }
+.tog.on .tog-hand { left:25px; }
+
+/* ── UTILS ── */
+.toast {
+  position:absolute; bottom:140px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:rgba(45,27,105,0.9); backdrop-filter:blur(8px); color:white;
+  padding:12px 24px; border-radius:var(--r-pill); font-size:13px; font-weight:700;
+  z-index:999; display:none; opacity:0; transition:all 0.25s ease;
+  box-shadow: 0 10px 25px rgba(45,27,105,0.25);
+}
+.toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
 <div id="app">
-  <div id="canvasWrapper">
+  <div id="toast" class="toast"></div>
+
+  <div id="splashScreen" class="screen active">
+    <div class="splash-bg-glow"></div>
+    <div class="splash-grid"></div>
+    <div class="splash-content">
+      <div class="splash-icon">⚡</div>
+      <div class="splash-game-label">Epic Mobile Run</div>
+      <div class="splash-title">DA<em>S</em>H</div>
+      <div class="splash-tagline">Endless Runner</div>
+      <button class="splash-play" onclick="goMenu()">Play Now</button>
+      <div class="splash-version">v1.0.4</div>
+    </div>
+  </div>
+
+  <div id="menuScreen" class="screen">
+    <div class="menu-topbar">
+      <div class="menu-logo">DASH</div>
+      <div class="menu-coin-pill">
+        <span>🪙</span>
+        <span id="menuCoinVal">0</span>
+      </div>
+    </div>
+    <div class="menu-hero">
+      <div id="menuChar" class="menu-char-wrap">🏃</div>
+      <div class="menu-best">PERSONAL BEST <strong id="menuBestVal">0m</strong></div>
+    </div>
+    <div class="menu-actions">
+      <button class="mnu-btn btn-play-main" onclick="startGame()">
+        <div class="mnu-btn-icon">🎮</div>
+        <div class="mnu-btn-text">START RUNNING<span>Sprint & avoid hazards</span></div>
+        <div class="mnu-btn-arrow">➔</div>
+      </button>
+      <button class="mnu-btn btn-shop-main" onclick="goShop()">
+        <div class="mnu-btn-icon">🛒</div>
+        <div class="mnu-btn-text">ITEM SHOP<span>Gear, characters & trails</span></div>
+        <div class="mnu-btn-arrow">➔</div>
+      </button>
+      <button class="mnu-btn btn-lb-main" onclick="goLB()">
+        <div class="mnu-btn-icon">🏆</div>
+        <div class="mnu-btn-text">LEADERBOARD<span>Top world rankings</span></div>
+        <div class="mnu-btn-arrow">➔</div>
+      </button>
+      <button class="mnu-btn btn-set-main" onclick="goSet()">
+        <div class="mnu-btn-icon">⚙️</div>
+        <div class="mnu-btn-text">SETTINGS<span>Audio, graphics & account</span></div>
+        <div class="mnu-btn-arrow">➔</div>
+      </button>
+    </div>
+    <div class="menu-bottom"></div>
+  </div>
+
+  <div id="gameScreen" class="screen">
     <canvas id="gameCanvas"></canvas>
-  </div>
-
-  <div id="hud" style="display:none;">
-    <div class="hud-box">🏃 <span id="hudDist">0m</span></div>
-    <div id="hudRight">
-      <div class="hud-box" style="color:var(--gold);">🪙 <span id="hudCoins">0</span></div>
-      <button class="btn btn-pause" onclick="pauseGame()">⏸️</button>
+    <div class="game-hud">
+      <button class="hud-pause-btn" onclick="pauseGame()">⏸</button>
+      <div class="hud-center-block">
+        <div id="hudDist" class="hud-dist-val">0</div>
+        <div class="hud-dist-lbl">METERS</div>
+      </div>
+      <div class="hud-coin-pill">
+        <span>🪙</span>
+        <span id="hudCoins">0</span>
+      </div>
+    </div>
+    <div class="hud-progress">
+      <div id="hudProgFill" class="hud-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="game-controls">
+      <button class="game-ctrl ctrl-jump" ontouchstart="doJump(); event.preventDefault();">JUMP ⇧</button>
+      <button class="game-ctrl ctrl-slide" ontouchstart="doSlide(1); event.preventDefault();">SLIDE ⇩</button>
     </div>
   </div>
 
-  <div id="scrHome" class="screen active">
-    <div class="brand-area">
-      <div class="logo-title">DASH</div>
-      <div class="logo-sub">Endless Runner</div>
-    </div>
-    <div class="menu-buttons">
-      <button class="btn btn-main" onclick="startGame()">⚡ PLAY NOW</button>
-      <button class="btn" onclick="openShop()">🛍️ ITEM SHOP</button>
-      <button class="btn" onclick="openLB()">🏆 LEADERBOARD</button>
+  <div id="pauseScreen" class="screen">
+    <div class="pause-sheet">
+      <div class="pause-top">
+        <h2>GAME PAUSED</h2>
+      </div>
+      <div class="pause-stats-row">
+        <div class="pause-stat-card">
+          <div id="pStatDist" class="pause-stat-val">0m</div>
+          <div class="pause-stat-lbl">Distance</div>
+        </div>
+        <div class="pause-stat-card">
+          <div id="pStatCoin" class="pause-stat-val">0</div>
+          <div class="pause-stat-lbl">Coins</div>
+        </div>
+      </div>
+      <div class="pause-btns">
+        <button class="p-btn p-btn-resume" onclick="resumeGame()">RESUME RUN</button>
+        <button class="p-btn p-btn-restart" onclick="startGame()">RESTART</button>
+        <button class="p-btn p-btn-home" onclick="goHome()">QUIT TO MENU</button>
+        <div class="pause-divider"></div>
+        <div class="pause-sound-row">
+          <span>Game Audio Options</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="scrShop" class="screen">
+  <div id="gameOverScreen" class="screen">
+    <div class="over-sheet">
+      <div class="over-neon-line"></div>
+      <div class="over-title">RUN OVER</div>
+      <div id="overSub" class="over-sub">You hit a hazardous barrier!</div>
+      <div class="over-stats-grid">
+        <div class="over-stat-card">
+          <div id="oStatDist" class="over-stat-val">0m</div>
+          <div class="over-stat-lbl">DISTANCE</div>
+        </div>
+        <div class="over-stat-card">
+          <div id="oStatCoin" class="over-stat-val">0</div>
+          <div class="over-stat-lbl">COINS BONUS</div>
+        </div>
+      </div>
+      <div class="over-best-row">
+        <span>PERSONAL BEST RECORD:</span>
+        <strong id="oBestVal">0m</strong>
+      </div>
+      <div class="over-stars">✨🏆✨</div>
+      <div class="over-btns">
+        <button class="o-btn o-btn-again" onclick="startGame()">RUN AGAIN ➔</button>
+        <div class="over-btn-row">
+          <button class="o-btn o-btn-home" onclick="goHome()">MENU</button>
+          <button class="o-btn o-btn-share" onclick="toast('Score shared to network!')">SHARE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="shopScreen" class="screen">
     <div class="shop-header">
-      <div class="shop-title">ITEM SHOP</div>
-      <div class="currency-display">🪙 <span id="shopCoins">0</span></div>
+      <button class="hdr-back" onclick="goHome()">➔</button>
+      <div class="hdr-title">ITEM SHOP</div>
+      <div class="hdr-coin-pill">
+        <span>🪙</span>
+        <span id="shopCoinVal">0</span>
+      </div>
     </div>
-    <div class="shop-tabs">
-      <button class="tab-btn active" onclick="switchTab('skin')">Skins</button>
-      <button class="tab-btn" onclick="switchTab('gear')">Gear</button>
+    <div class="shop-tabs-wrap">
+      <button id="tab-all" class="s-tab on" onclick="renderShop('all')">All Items</button>
+      <button id="tab-char" class="s-tab" onclick="renderShop('char')">Avatars</button>
+      <button id="tab-gear" class="s-tab" onclick="renderShop('gear')">Gear</button>
     </div>
     <div id="shopGrid" class="shop-grid"></div>
-    <button class="btn" onclick="closeShop()">⬅️ BACK TO MENU</button>
   </div>
 
-  <div id="scrLB" class="screen" style="background:#FAF5FF; z-index:20;">
-    <div class="shop-header">
-      <div class="shop-title">LEADERBOARD</div>
+  <div id="leaderboardScreen" class="screen">
+    <div class="lb-header">
+      <button class="hdr-back" onclick="goHome()">➔</button>
+      <div class="hdr-title">LEADERBOARD</div>
+    </div>
+    <div class="lb-podium-wrap">
+      <div class="lb-podium">
+        <div class="pod-item">
+          <div class="pod-emoji">🥈</div>
+          <div class="pod-block pod-2">2</div>
+          <div class="pod-name">Sahan.fx</div>
+        </div>
+        <div class="pod-item">
+          <div class="pod-emoji">👑</div>
+          <div class="pod-block pod-1">1</div>
+          <div class="pod-name">DashMaster</div>
+        </div>
+        <div class="pod-item">
+          <div class="pod-emoji">🥉</div>
+          <div class="pod-block pod-3">3</div>
+          <div class="pod-name">Nimna_0x</div>
+        </div>
+      </div>
     </div>
     <div id="lbList" class="lb-list"></div>
-    <button class="btn" onclick="closeLB()">⬅️ BACK TO MENU</button>
   </div>
 
-  <div id="popPause" class="overlay">
-    <div class="overlay-card">
-      <div class="overlay-title">PAUSED</div>
-      <div class="menu-buttons" style="margin:0; gap:12px;">
-        <button class="btn btn-main" onclick="resumeGame()">▶️ RESUME</button>
-        <button class="btn" onclick="quitGame()">🏠 MAIN MENU</button>
+  <div id="settingsScreen" class="screen">
+    <div class="set-header">
+      <button class="hdr-back" onclick="goHome()">➔</button>
+      <div class="hdr-title">SETTINGS</div>
+    </div>
+    <div class="set-body">
+      <div class="set-section-lbl">Preferences</div>
+      <div class="set-card">
+        <div class="set-row">
+          <div class="set-row-icon ic-sound">🔊</div>
+          <div class="set-row-name">SFX Sound Effects<span>Jump, slide, coin alerts</span></div>
+          <div id="tog-sfx" class="tog on" onclick="toggleTog('sfx')"><div class="tog-hand"></div></div>
+        </div>
+        <div class="set-row">
+          <div class="set-row-icon ic-music">🎵</div>
+          <div class="set-row-name">Background Music<span>Looping arcade sound</span></div>
+          <div id="tog-bgm" class="tog on" onclick="toggleTog('bgm')"><div class="tog-hand"></div></div>
+        </div>
+      </div>
+      <div class="set-section-lbl">Profile & System</div>
+      <div class="set-card">
+        <div class="set-row" onclick="toast('Data fully synchronized!')" style="cursor:pointer;">
+          <div class="set-row-icon ic-lock">☁️</div>
+          <div class="set-row-name">Cloud Save Sync<span>Backup game records</span></div>
+          <div style="font-size:12px; color:var(--muted);">SYNCED</div>
+        </div>
+        <div class="set-row" onclick="window.location.reload()" style="cursor:pointer;">
+          <div class="set-row-icon ic-star">🔄</div>
+          <div class="set-row-name">Force Restart PWA<span>Clear cache & reload</span></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="popGameOver" class="overlay">
-    <div class="overlay-card">
-      <div class="overlay-title">GAME OVER</div>
-      <div class="stats-group">
-        <div class="stat-row"><span>Distance:</span><span class="stat-val" id="resDist">0m</span></div>
-        <div class="stat-row"><span>Coins Collected:</span><span class="stat-val" id="resCoins" style="color:var(--gold);">0</span></div>
-        <div class="stat-row"><span>Best Run:</span><span class="stat-val" id="resBest" style="color:var(--green);">0m</span></div>
-      </div>
-      <div class="menu-buttons" style="margin:0; gap:12px;">
-        <button class="btn btn-main" onclick="startGame()">🔄 TRY AGAIN</button>
-        <button class="btn" onclick="quitGame()">🏠 MAIN MENU</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast">Message</div>
 </div>
 
 <script>
-// ══ AUDIO ENGINE (Procedural 8-Bit Retro Sounds & Stable Loop) ══
-const AudioEngine = {
-  ctx: null,
-  bgmInterval: null,
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume(); // Resumes audio context if blocked by browser autoplay policy
-    }
-  },
-  playCoin() {
-    this.init(); let t = this.ctx.currentTime;
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, t); osc.frequency.setValueAtTime(880, t + 0.08);
-    gain.gain.setValueAtTime(0.06, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.2);
-  },
-  playJump() {
-    this.init(); let t = this.ctx.currentTime;
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(600, t + 0.12);
-    gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0.001, t + 0.12);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.12);
-  },
-  playSlide() {
-    this.init(); let t = this.ctx.currentTime;
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(280, t); osc.frequency.linearRampToValueAtTime(90, t + 0.18);
-    gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0.001, t + 0.18);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.18);
-  },
-  playGameOver() {
-    this.init(); this.stopBGM(); let t = this.ctx.currentTime;
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(260, t); osc.frequency.linearRampToValueAtTime(130, t + 0.2); osc.frequency.linearRampToValueAtTime(70, t + 0.45);
-    gain.gain.setValueAtTime(0.12, t); gain.gain.linearRampToValueAtTime(0.001, t + 0.5);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.5);
-  },
-  playBGM() {
-    this.init(); this.stopBGM();
-    // A sweet catchy 8-bit retro gaming melody track
-    let notes = [329.63, 392.00, 523.25, 392.00, 349.23, 440.00, 493.88, 392.00]; 
-    let tempo = 220; 
-    let step = 0;
-    
-    this.bgmInterval = setInterval(() => {
-      if (gPaused || !gRunning) return; 
-      let t = this.ctx.currentTime;
-      let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-      osc.type = 'square'; 
-      osc.frequency.setValueAtTime(notes[step % notes.length], t);
-      gain.gain.setValueAtTime(0.015, t); // Low volume background theme
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-      osc.connect(gain); gain.connect(this.ctx.destination);
-      osc.start(t); osc.stop(t + 0.2);
-      step++;
-    }, tempo);
-  },
-  stopBGM() {
-    if (this.bgmInterval) { clearInterval(this.bgmInterval); this.bgmInterval = null; }
-  }
-};
-
-// ══ DATA STATE ══
+// ══ USER DATA & PERSISTENCE ══
 let coins = parseInt(localStorage.getItem('dash_coins')) || 0;
 let best = parseInt(localStorage.getItem('dash_best')) || 0;
-let owned = JSON.parse(localStorage.getItem('dash_owned')) || { s1: true };
-let equipped = JSON.parse(localStorage.getItem('dash_equipped')) || { skin: 's1', gear: [] };
+let settings = JSON.parse(localStorage.getItem('dash_settings')) || { sfx:true, bgm:true };
 
-const ITEMS = [
-  { id: 's1', name: 'Classic Pink', type: 'skin', icon: '🏃‍♀️', price: 0, color: '#EC4899' },
-  { id: 's2', name: 'Neon Cyber', type: 'skin', icon: '🤖', price: 15, color: '#06B6D4' },
-  { id: 's3', name: 'Golden Flash', type: 'skin', icon: '🦊', price: 40, color: '#F59E0B' },
-  { id: 's4', name: 'Void Shadow', type: 'skin', icon: '🥷', price: 75, color: '#312E81' },
-  { id: 'g1', name: 'Cool Shades', type: 'gear', icon: '🕶️', price: 10 },
-  { id: 'g2', name: 'Jetpack Cap', type: 'gear', icon: '🧢', price: 25 },
-  { id: 'g3', name: 'Golden Crown', type: 'gear', icon: '👑', price: 50 }
+function saveUser(){
+  localStorage.setItem('dash_coins', coins);
+  localStorage.setItem('dash_best', best);
+  localStorage.setItem('dash_settings', JSON.stringify(settings));
+}
+
+// ══ AUDIO SYSTEM (Procedural Web Audio API) ══
+let audioCtx = null;
+let bgmInterval = null;
+let bgmStep = 0;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// Background Music Notes
+const bgmMelody = [
+  261.63, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 293.66,
+  329.63, 349.23, 392.00, 440.00, 493.88, 440.00, 392.00, 349.23
 ];
 
-const LB = [
-  { rank: 1, name: 'SahanK_99', score: '2450m' },
-  { rank: 2, name: 'Dilshan_Dev', score: '1980m' },
-  { rank: 3, name: 'Dewmi Umegha', score: '0m', you: true },
-  { rank: 4, name: 'Kavindi_P', score: '1120m' },
-  { rank: 5, name: 'Nimna_X', score: '850m' }
-];
+function playBGMStep() {
+  if (!settings.bgm || !audioCtx) return;
+  
+  let osc = audioCtx.createOscillator();
+  let gain = audioCtx.createGain();
+  
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(bgmMelody[bgmStep % bgmMelody.length], audioCtx.currentTime);
+  
+  gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+  
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.25);
+  
+  bgmStep++;
+}
 
-// ══ GAME ENGINE ══
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+function startBGM() {
+  if (bgmInterval) clearInterval(bgmInterval);
+  bgmStep = 0;
+  bgmInterval = setInterval(playBGMStep, 250);
+}
+
+function stopBGM() {
+  if (bgmInterval) {
+    clearInterval(bgmInterval);
+    bgmInterval = null;
+  }
+}
+
+// Retro SFX Synth
+function playSynthSound(freq, type, duration, vol) {
+  if (!settings.sfx || !audioCtx) return;
+  try {
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    if(freq === 880) { // Coin sliding effect
+      osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + duration);
+    }
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch(e){}
+}
+
+// ══ INITIAL ENGINE CONFIG ══
+const cvs = document.getElementById('gameCanvas');
+const ctx = cvs.getContext('2d');
+cvs.width = 390;
+cvs.height = 844;
 
 let gRunning = false, gPaused = false;
-let distance = 0, sessionCoins = 0, speed = 4;
-let player, obstacles = [], baseLine, animId, frameCount = 0;
+let distance = 0, speed = 4;
+let lastTime = 0;
 
-function resizeCanvas() {
-  const w = canvas.parentElement.clientWidth;
-  const h = canvas.parentElement.clientHeight;
-  canvas.width = w; canvas.height = h;
-  baseLine = h * 0.75;
-  if(player) player.y = baseLine - player.h;
-}
-window.addEventListener('resize', resizeCanvas);
+// Entities
+let player = { x:60, y:560, w:44, h:64, targetH:64, vY:0, grounded:true, state:'run', color:'#A855F7', trail:[] };
+let obstacles = [];
+let spawnCoins = [];
+let particles = [];
 
-class Player {
-  constructor() {
-    this.w = 34; this.h = 54;
-    this.x = 50; this.y = 0;
-    this.vy = 0; this.gravity = 0.6;
-    this.isJumping = false;
-    this.isSliding = false;
-    this.slideTimer = 0;
-  }
-  update() {
-    this.vy += this.gravity;
-    this.y += this.vy;
-    if (this.y >= baseLine - this.h) {
-      this.y = baseLine - this.h; this.vy = 0; this.isJumping = false;
-    }
-    if (this.isSliding) {
-      this.slideTimer--;
-      if (this.slideTimer <= 0) { this.isSliding = false; this.h = 54; this.y = baseLine - this.h; }
-    }
-  }
-  draw() {
-    const curSkin = ITEMS.find(i => i.id === equipped.skin);
-    ctx.fillStyle = curSkin ? curSkin.color : '#EC4899';
-    ctx.beginPath();
-    ctx.roundRect(this.x, this.y, this.w, this.h, this.isSliding ? 8 : 12);
-    ctx.fill();
-    
-    ctx.fillStyle = '#000';
-    if(this.isSliding) {
-      ctx.fillRect(this.x + 22, this.y + 10, 4, 4);
-    } else {
-      ctx.fillRect(this.x + 22, this.y + 12, 4, 4);
-      ctx.fillRect(this.x + 12, this.y + 12, 4, 4);
-    }
+// Shop catalog Config
+const ITEMS = [
+  { id:'c1', cat:'char', name:'Default Runner', icon:'🏃', price:0, bonus:'Standard agility' },
+  { id:'c2', cat:'char', name:'Neon Cyber', icon:'🤖', price:80, bonus:'+5% Score gain' },
+  { id:'c3', cat:'char', name:'Gold King', icon:'👑', price:250, bonus:'2x Coin Magnetism' },
+  { id:'c4', cat:'char', name:'Cosmic Cat', icon:'🐱', price:500, bonus:'Low Gravity jump' },
+  { id:'g1', cat:'gear', name:'Cyber Headphones', icon:'🎧', price:40, bonus:'Visual accent' },
+  { id:'g2', cat:'gear', name:'Jet Sneakers', icon:'👟', price:120, bonus:'Longer slides' },
+  { id:'g3', cat:'gear', name:'Aura Shield', icon:'🛡️', price:300, bonus:'Extra Life chance' }
+];
 
-    equipped.gear.forEach(gid => {
-      const g = ITEMS.find(i => i.id === gid);
-      if(g) {
-        ctx.font = "16px Inter";
-        if(g.id==='g1') ctx.fillText(g.icon, this.x + 14, this.y + 16);
-        if(g.id==='g2') ctx.fillText(g.icon, this.x + 8, this.y - 4); 
-        if(g.id==='g3') ctx.fillText(g.icon, this.x + 6, this.y - 8); 
-      }
-    });
-  }
+let owned = { c1:true, c2:false, c3:false, c4:false, g1:false, g2:false, g3:false };
+let equipped = { char:'c1', gear:[] };
+
+// Mock Database Leaderboard
+let LB = [
+  { rank:1, name:'DashMaster', score:'2450m' },
+  { rank:2, name:'Sahan.fx', score:'1890m' },
+  { rank:3, name:'Nimna_0x', score:'1520m' },
+  { rank:4, name:'You', score:'0m', you:true },
+  { rank:5, name:'Kawdi_Girl', score:'820m' }
+];
+
+// Load inventory
+if(localStorage.getItem('dash_owned')) owned = JSON.parse(localStorage.getItem('dash_owned'));
+if(localStorage.getItem('dash_equipped')) equipped = JSON.parse(localStorage.getItem('dash_equipped'));
+
+function saveInventory(){
+  localStorage.setItem('dash_owned', JSON.stringify(owned));
+  localStorage.setItem('dash_equipped', JSON.stringify(equipped));
 }
 
-class Obstacle {
-  constructor() {
-    this.type = Math.random() > 0.4 ? 'coin' : (Math.random() > 0.5 ? 'spike' : 'barrier');
-    this.x = canvas.width + 50;
-    this.active = true;
-    if (this.type === 'coin') { this.w = 16; this.h = 16; this.y = baseLine - 20 - Math.random() * 50; }
-    else if (this.type === 'spike') { this.w = 26; this.h = 30; this.y = baseLine - this.h; }
-    else { this.w = 24; this.h = 24; this.y = baseLine - 58; }
-  }
-  update() { this.x -= speed; if (this.x < -40) this.active = false; }
-  draw() {
-    if (this.type === 'coin') {
-      ctx.fillStyle = '#F59E0B'; ctx.beginPath(); ctx.arc(this.x + 8, this.y + 8, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFF'; ctx.font = "10px Inter"; ctx.fillText("$", this.x + 5, this.y + 11);
-    } else if (this.type === 'spike') {
-      ctx.fillStyle = '#EF4444'; ctx.beginPath();
-      ctx.moveTo(this.x, baseLine); ctx.lineTo(this.x + this.w / 2, this.y); ctx.lineTo(this.x + this.w, baseLine);
-      ctx.fill();
-    } else {
-      ctx.fillStyle = '#3B82F6'; ctx.beginPath(); ctx.roundRect(this.x, this.y, this.w, this.h, 6); ctx.fill();
-    }
-  }
-}
-
-function doJump() {
-  if (!player.isJumping && !player.isSliding && gRunning && !gPaused) {
-    player.vy = -12; player.isJumping = true;
-    AudioEngine.playJump();
-  }
-}
-function doSlide(dir) {
-  if (dir === 1 && !player.isJumping && !player.isSliding && gRunning && !gPaused) {
-    player.isSliding = true; player.slideTimer = 45; player.h = 28; player.y = baseLine - player.h;
-    AudioEngine.playSlide();
-  }
-}
-
-function loop() {
-  if (!gRunning || gPaused) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ctx.strokeStyle = 'rgba(139,92,246,0.2)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, baseLine); ctx.lineTo(canvas.width, baseLine); ctx.stroke();
-  ctx.fillStyle = '#FAF5FF'; ctx.fillRect(0, baseLine + 2, canvas.width, canvas.height - baseLine);
-
-  distance++; speed = 4 + Math.floor(distance / 400);
-  document.getElementById('hudDist').innerText = Math.floor(distance / 10) + 'm';
-
-  player.update(); player.draw();
-
-  if (frameCount % 90 === 0) obstacles.push(new Obstacle());
-  frameCount++;
-
-  obstacles.forEach(o => {
-    o.update(); o.draw();
-    if (o.active && o.x < player.x + player.w && o.x + o.w > player.x && o.y < player.y + player.h && o.y + o.h > player.y) {
-      if (o.type === 'coin') {
-        o.active = false; sessionCoins++; coins++;
-        localStorage.setItem('dash_coins', coins);
-        document.getElementById('hudCoins').innerText = sessionCoins;
-        AudioEngine.playCoin();
-      } else {
-        endGame();
-      }
-    }
-  });
-  obstacles = obstacles.filter(o => o.active);
-  animId = requestAnimationFrame(loop);
-}
-
-// ══ APP INTERACTION FLUIDITY ══
-function toast(msg) {
-  const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-function showScreen(id) {
+// ══ NAVIGATION NAVIGATION ══
+function showScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function openShop() {
-  AudioEngine.init(); // Init audio upon button interactions
-  document.getElementById('shopCoins').innerText = coins; switchTab('skin'); showScreen('scrShop');
-}
-function closeShop() { showScreen('scrHome'); }
-function openLB() {
-  AudioEngine.init();
-  const me = LB.find(r => r.you); if (me) me.score = best + 'm';
-  LB.sort((a, b) => parseInt(b.score) - parseInt(a.score)).forEach((r, i) => r.rank = i + 1);
-  document.getElementById('lbList').innerHTML = LB.map(r => `
-    <div class="lb-row${r.you ? ' lb-you' : ''}">
-      <div class="lb-rank">${r.rank}</div>
-      <div class="lb-ava">${r.you ? '⭐' : '🏃'}</div>
-      <div class="lb-info">
-        <div class="lb-info-name">${r.name}</div>
-        ${r.you ? '<div class="lb-info-sub">Your best personal score</div>' : ''}
-      </div>
-      <div class="lb-score">${r.score}</div>
-    </div>`).join('');
-  showScreen('scrLB');
-}
-function closeLB() { showScreen('scrHome'); }
 
-function switchTab(cat) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (event) event.target.classList.add('active');
-  const filtered = ITEMS.filter(i => i.type === cat);
-  document.getElementById('shopGrid').innerHTML = filtered.map(item => {
-    let btnHtml = '';
-    if (owned[item.id]) {
-      const isEq = (item.type === 'skin' ? equipped.skin === item.id : equipped.gear.includes(item.id));
-      btnHtml = `<button class="btn-buy" style="background:#E2E8F0;" onclick="equipItem('${item.id}','${item.type}')">${isEq ? 'EQUIPPED' : 'EQUIP'}</button>`;
-    } else {
-      btnHtml = `<button class="btn-buy" style="background:var(--neon);color:white;" onclick="buyItem('${item.id}')">BUY</button>`;
+function goMenu(){
+  initAudio();
+  startBGM();
+  document.getElementById('menuCoinVal').innerText = coins;
+  document.getElementById('menuBestVal').innerText = best + 'm';
+  const item = ITEMS.find(i=>i.id===equipped.char);
+  document.getElementById('menuChar').innerText = item?item.icon:'🏃';
+  showScreen('menuScreen');
+}
+
+function goHome(){
+  gRunning = false;
+  startBGM();
+  goMenu();
+}
+function goShop(){ showScreen('shopScreen'); renderShop('all'); }
+function goLB(){ showScreen('leaderboardScreen'); renderLB(); }
+function goSet(){
+  showScreen('settingsScreen');
+  document.getElementById('tog-sfx').className = 'tog ' + (settings.sfx?'on':'');
+  document.getElementById('tog-bgm').className = 'tog ' + (settings.bgm?'on':'');
+}
+
+function toggleTog(key){
+  settings[key] = !settings[key];
+  document.getElementById('tog-'+key).className = 'tog ' + (settings[key?'on':'']);
+  saveUser();
+  if(key === 'bgm') {
+    if(settings.bgm) startBGM();
+    else stopBGM();
+  }
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.innerText = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ══ SYSTEM GAME CORE ══
+function startGame(){
+  initAudio();
+  stopBGM(); // Stop menu loop to let game cycle sync
+  startBGM();
+  
+  gRunning = true; gPaused = false;
+  distance = 0; speed = 5.5; lastTime = 0;
+  obstacles = []; spawnCoins = []; particles = [];
+  
+  player.y = 560; player.vY = 0; player.grounded = true;
+  player.state = 'run'; player.trail = [];
+  
+  const charItem = ITEMS.find(i=>i.id===equipped.char);
+  player.icon = charItem ? charItem.icon : '🏃';
+  
+  document.getElementById('hudCoins').innerText = coins;
+  showScreen('gameScreen');
+  requestAnimationFrame(gameLoop);
+}
+
+function pauseGame(){
+  if(!gRunning) return;
+  gPaused = true;
+  stopBGM();
+  document.getElementById('pStatDist').innerText = Math.floor(distance) + 'm';
+  document.getElementById('pStatCoin').innerText = coins;
+  showScreen('pauseScreen');
+}
+
+function resumeGame(){
+  gPaused = false;
+  startBGM();
+  showScreen('gameScreen');
+  requestAnimationFrame(gameLoop);
+}
+
+function gameOver(){
+  gRunning = false;
+  stopBGM();
+  playSynthSound(150, 'sawtooth', 0.6, 0.25);
+  
+  if(Math.floor(distance) > best) {
+    best = Math.floor(distance);
+    toast('👑 NEW PERSONAL BEST HIGH SCORE!');
+  }
+  saveUser();
+  
+  document.getElementById('oStatDist').innerText = Math.floor(distance) + 'm';
+  document.getElementById('oStatCoin').innerText = coins;
+  document.getElementById('oBestVal').innerText = best + 'm';
+  
+  showScreen('gameOverScreen');
+}
+
+// Input Actions
+function doJump(){
+  if(!gRunning || gPaused) return;
+  if(player.grounded){
+    let jForce = -15;
+    if(equipped.char === 'c4') jForce = -13.5; // Low gravity mod
+    player.vY = jForce;
+    player.grounded = false;
+    player.state = 'jump';
+    playSynthSound(330, 'square', 0.15, 0.12);
+    spawnPart(player.x+10, player.y+50, '#A855F7', 6);
+  }
+}
+
+let slideTimeout = null;
+function doSlide(dir){
+  if(!gRunning || gPaused || !player.grounded) return;
+  player.state = 'slide';
+  player.targetH = 34;
+  playSynthSound(220, 'triangle', 0.12, 0.15);
+  spawnPart(player.x, player.y+50, '#EC4899', 4);
+  
+  if(slideTimeout) clearTimeout(slideTimeout);
+  let dur = 750;
+  if(equipped.gear.includes('g2')) dur = 1050; // Jet sneakers slide bonus
+  
+  slideTimeout = setTimeout(()=>{
+    player.targetH = 64;
+    if(player.state==='slide') player.state='run';
+  }, dur);
+}
+
+function spawnPart(x,y,col,cnt){
+  for(let i=0;i<cnt;i++) particles.push({x, y, vX:(Math.random()-0.5)*6 - 2, vY:(Math.random()-0.5)*6, r:Math.random()*4+2, col, alpha:1});
+}
+
+// ══ MAIN ENGINE UPDATE ══
+function gameLoop(time){
+  if(!gRunning || gPaused) return;
+  if(!lastTime) lastTime = time;
+  let dt = (time - lastTime)/1000;
+  if(dt > 0.1) dt = 0.1;
+  lastTime = time;
+
+  update(dt);
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+function update(dt){
+  distance += speed * dt * 1.5;
+  speed += 0.04 * dt; // gradual accelerator acceleration
+  document.getElementById('hudDist').innerText = Math.floor(distance);
+  document.getElementById('hudProgFill').style.width = Math.min(100, (distance/10)) + '%';
+
+  // Lerp height mapping
+  player.h += (player.targetH - player.h) * 15 * dt;
+  if(player.state === 'slide') player.y = 624 - player.h;
+
+  // Mechanics physics
+  if(!player.grounded || player.state==='jump'){
+    player.vY += 38 * dt; // gravity constant
+    player.y += player.vY;
+    if(player.y >= 560){
+      player.y = 560; player.vY = 0; player.grounded = true;
+      if(player.state==='jump') player.state = 'run';
     }
-    return `
-      <div class="shop-item">
-        <div class="item-ico">${item.icon}</div>
-        <div class="item-nm">${item.name}</div>
-        <div class="item-pr">${item.price === 0 ? 'Free' : '🪙 ' + item.price}</div>
+  }
+
+  // FX trails trail matrix tracker
+  if(Math.random() < 0.45){
+    player.trail.push({x: player.x, y: player.y + (player.h/2), w:player.w, h:player.h, alpha: 0.45});
+  }
+  player.trail.forEach(t => t.alpha -= 1.8 * dt);
+  player.trail = player.trail.filter(t => t.alpha > 0);
+
+  // Spawners Engine
+  if(obstacles.length === 0 || obstacles[obstacles.length-1].x < 390 - (Math.random()*160 + 150)){
+    let type = Math.random() < 0.45 ? 'low' : 'high';
+    let oY = type==='low'? 574 : 510;
+    let oW = 24 + Math.random()*16;
+    let oH = type==='low'? 50 : 40;
+    obstacles.push({x:390, y:oY, w:oW, h:oH, type, passed:false});
+  }
+
+  if(spawnCoins.length === 0 || spawnCoins[spawnCoins.length-1].x < 390 - 90){
+    if(Math.random() < 0.7){
+      let cY = Math.random() < 0.5 ? 560 : 480;
+      spawnCoins.push({x:390, y:cY, r:10, collected:false});
+    }
+  }
+
+  // Iterators logic updates
+  obstacles.forEach(o => {
+    o.x -= speed * 60 * dt;
+    // AABB Collision bounds check
+    let pY = player.state==='slide'? 624 - player.h : player.y;
+    if(player.x < o.x + o.w && player.x + player.w > o.x && pY < o.y + o.h && pY + player.h > o.y){
+      if(equipped.gear.includes('g3') && Math.random() < 0.4) { // Aura Shield luck trigger
+        o.x = -100;
+        toast('🛡️ Shield Absorbed Threat!');
+      } else {
+        gameOver();
+      }
+    }
+  });
+  obstacles = obstacles.filter(o => o.x > -50);
+
+  spawnCoins.forEach(c => {
+    c.x -= speed * 60 * dt;
+    // Magnet calculation line
+    if(equipped.char === 'c3') { // Gold king pull
+      let dX = player.x - c.x;
+      let dY = player.y - c.y;
+      let dist = Math.hypot(dX, dY);
+      if(dist < 110) { c.x += (dX/dist)*320*dt; c.y += (dY/dist)*320*dt; }
+    }
+    
+    let pY = player.state==='slide'? 624 - player.h : player.y;
+    if(!c.collected && c.x > player.x && c.x < player.x + player.w && c.y > pY && c.y < pY + player.h){
+      c.collected = true;
+      let bonus = 1;
+      coins += bonus;
+      document.getElementById('hudCoins').innerText = coins;
+      document.getElementById('menuCoinVal').innerText = coins;
+      playSynthSound(880, 'sine', 0.1, 0.18);
+      spawnPart(c.x, c.y, '#F59E0B', 5);
+      saveUser();
+    }
+  });
+  spawnCoins = spawnCoins.filter(c => c.x > -30 && !c.collected);
+
+  particles.forEach(p => { p.x += p.vX; p.y += p.vY; p.alpha -= 2*dt; });
+  particles = particles.filter(p => p.alpha > 0);
+}
+
+// ══ CANVAS RENDER GRAPHICS ══
+function render(){
+  ctx.clearRect(0, 0, 390, 844);
+
+  // Grid background visual layers
+  ctx.strokeStyle = 'rgba(139,92,246,0.06)';
+  ctx.lineWidth = 1;
+  let offsetX = (distance * 2) % 40;
+  for(let x = -offsetX; x < 390; x += 40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,844); ctx.stroke(); }
+  
+  // Floor lane
+  ctx.fillStyle = '#E8D5FF';
+  ctx.fillRect(0, 624, 390, 220);
+  ctx.fillStyle = '#A855F7';
+  ctx.fillRect(0, 624, 390, 4);
+
+  // Render Trail alpha frames
+  player.trail.forEach(t => {
+    ctx.fillStyle = player.color;
+    ctx.globalAlpha = t.alpha;
+    ctx.fillRect(t.x, 624 - t.h, t.w, t.h);
+  });
+  ctx.globalAlpha = 1.0;
+
+  // Render character player emoji node
+  ctx.save();
+  ctx.font = `${player.h + 8}px Inter`;
+  ctx.textAlign = 'center';
+  let charY = player.state==='slide' ? 624 : player.y + player.h - 4;
+  ctx.fillText(player.icon, player.x + (player.w/2), charY);
+  
+  // Gear styling stack
+  if(equipped.gear.includes('g1')) { // Headphones layout offset
+    ctx.font = '16px Inter';
+    ctx.fillText('🎧', player.x + (player.w/2), charY - (player.h * 0.75));
+  }
+  ctx.restore();
+
+  // Render Enemies
+  obstacles.forEach(o => {
+    ctx.fillStyle = o.type==='low'? '#F43F8E' : '#38BDF8';
+    ctx.beginPath();
+    ctx.roundRect(o.x, o.y, o.w, o.h, 8);
+    ctx.fill();
+    // Hazard styling highlight neon accent lines
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillRect(o.x+4, o.y+4, o.w-8, 4);
+  });
+
+  // Render Gold Items
+  spawnCoins.forEach(c => {
+    ctx.fillStyle = '#F59E0B';
+    ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#FBBF24';
+    ctx.beginPath(); ctx.arc(c.x, c.y, c.r - 3, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Particles cluster loop
+  particles.forEach(p => {
+    ctx.fillStyle = p.col; ctx.globalAlpha = p.alpha;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1.0;
+}
+
+// ══ CATALOG SHOP RENDER ENGINE ══
+function renderShop(filter){
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+filter).classList.add('on');
+  
+  let grid = document.getElementById('shopGrid');
+  grid.innerHTML = '';
+  
+  ITEMS.forEach(item => {
+    if(filter !== 'all' && item.cat !== filter) return;
+    
+    let isOwned = owned[item.id];
+    let isEquipped = equipped.char === item.id || equipped.gear.includes(item.id);
+    
+    let btnHtml = '';
+    if(isEquipped){ btnHtml = `<button class="s-buy-btn s-btn-eq">EQUIPPED</button>`; }
+    else if(isOwned){ btnHtml = `<button class="s-buy-btn s-btn-equip" onclick="equipItem('${item.id}','${item.cat}')">EQUIP</button>`; }
+    else { btnHtml = `<button class="s-buy-btn s-btn-buy" onclick="buyItem('${item.id}')">🪙 ${item.price}</button>`; }
+    
+    grid.innerHTML += `
+      <div class="s-item ${isEquipped?'s-equipped':''}">
+        ${isEquipped?`<div class="s-on-badge">ACTIVE</div>`:''}
+        <span class="s-icon">${item.icon}</span>
+        <div class="s-name">${item.name}</div>
+        <div class="s-bonus">${item.bonus}</div>
         ${btnHtml}
       </div>`;
-  }).join('');
+  });
+  document.getElementById('shopCoinVal').innerText = coins;
 }
 
-function buyItem(id) {
-  const item = ITEMS.find(i => i.id === id);
-  if (coins >= item.price) {
-    coins -= item.price; owned[id] = true;
-    localStorage.setItem('dash_coins', coins);
-    localStorage.setItem('dash_owned', JSON.stringify(owned));
-    document.getElementById('shopCoins').innerText = coins;
-    toast(item.name + ' purchased!'); switchTab(item.type);
-    AudioEngine.playCoin();
-  } else { toast('Not enough coins!'); }
+function buyItem(id){
+  const item = ITEMS.find(i=>i.id===id);
+  if(coins < item.price){ toast('⚠️ Insufficient standard currency balance!'); return; }
+  coins -= item.price; owned[id] = true;
+  toast(item.icon + ' ' + item.name + ' purchased!');
+  saveUser(); saveInventory(); renderShop('all');
 }
-function equipItem(id, cat) {
-  if (cat === 'skin') equipped.skin = id;
-  else {
-    const idx = equipped.gear.indexOf(id);
-    if (idx > -1) equipped.gear.splice(idx, 1); else equipped.gear.push(id);
-  }
-  localStorage.setItem('dash_equipped', JSON.stringify(equipped));
-  toast('Equipment updated!'); switchTab(cat);
-  AudioEngine.playCoin();
+function equipItem(id,cat){
+  if(cat==='gear'){
+    if(!equipped.gear.includes(id)) equipped.gear.push(id);
+  } else { equipped[cat] = id; }
+  const item = ITEMS.find(i=>i.id===id);
+  toast(item.icon + ' ' + item.name + ' equipped!');
+  saveInventory(); renderShop('all');
 }
 
-// ══ CONTROL FLOWS ══
-function startGame() {
-  gRunning = true; gPaused = false;
-  AudioEngine.init();
-  AudioEngine.playBGM(); 
-  document.getElementById('hud').style.display = 'flex';
-  document.getElementById('popGameOver').style.display = 'none';
-  showScreen('scrHome'); document.getElementById('scrHome').classList.remove('active'); 
-  distance = 0; sessionCoins = 0; obstacles = []; frameCount = 0;
-  document.getElementById('hudCoins').innerText = '0';
-  player = new Player(); resizeCanvas(); loop();
-}
-function pauseGame() { gPaused = true; document.getElementById('popPause').style.display = 'flex'; }
-function resumeGame() { gPaused = false; document.getElementById('popPause').style.display = 'none'; loop(); }
-function quitGame() {
-  gRunning = false; gPaused = false; cancelAnimationFrame(animId);
-  AudioEngine.stopBGM(); 
-  document.getElementById('hud').style.display = 'none';
-  document.getElementById('popPause').style.display = 'none';
-  document.getElementById('popGameOver').style.display = 'none';
-  ctx.clearRect(0, 0, canvas.width, canvas.height); showScreen('scrHome');
-}
-function endGame() {
-  gRunning = false; cancelAnimationFrame(animId);
-  AudioEngine.playGameOver();
-  let finalDist = Math.floor(distance / 10);
-  if (finalDist > best) { best = finalDist; localStorage.setItem('dash_best', best); }
-  document.getElementById('resDist').innerText = finalDist + 'm';
-  document.getElementById('resCoins').innerText = sessionCoins;
-  document.getElementById('resBest').innerText = best + 'm';
-  document.getElementById('popGameOver').style.display = 'flex';
+// ══ LEADERBOARD RENDER ══
+function renderLB(){
+  document.getElementById('lbList').innerHTML = LB.map(r=>`
+    <div class="lb-row${r.you?' lb-you':''}">
+      <div class="lb-rank">${r.rank}</div>
+      <div class="lb-ava">${r.you?'⭐':'🏃'}</div>
+      <div class="lb-info">
+        <div class="lb-info-name">${r.you?'You':r.name}</div>
+        ${r.you?'<div class="lb-info-sub">Your best</div>':''}
+      </div>
+      <div class="lb-score">${r.you ? best+'m' : r.score}</div>
+    </div>`).join('');
 }
 
-// Input Touch Triggers
+// ══ CONTROLS EVENT HANDLERS ══
 document.addEventListener('keydown', e => {
-  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
-  if (e.code === 'ArrowDown') { e.preventDefault(); doSlide(1); }
+  if(e.code==='Space' || e.code==='ArrowUp'){ e.preventDefault(); doJump(); }
+  if(e.code==='ArrowDown'){ e.preventDefault(); doSlide(1); }
+  if(e.code==='Escape' && gRunning) pauseGame();
 });
-let tsY = 0;
-canvas.addEventListener('touchstart', e => { tsY = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
-canvas.addEventListener('touchend', e => {
-  let teY = e.changedTouches[0].clientY;
-  if (tsY - teY > 30) doJump();
-  else if (teY - tsY > 30) doSlide(1);
-}, { passive: false });
 
-resizeCanvas();
+// Autoload framework sequences
+window.onload = () => {
+  // PWA Register configuration stub
+};
 </script>
 </body>
 </html>
