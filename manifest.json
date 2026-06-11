@@ -1,0 +1,24 @@
+{
+  "name": "DASH — Endless Runner",
+  "short_name": "DASH",
+  "description": "Run, collect coins and beat your high score!",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#C4B5FD",
+  "theme_color": "#A855F7",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
