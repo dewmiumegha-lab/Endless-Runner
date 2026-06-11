@@ -77,7 +77,6 @@ canvas { width: 100%; height: 100%; display: block; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
-  transform: italic;
 }
 .logo-sub {
   font-size: 14px;
@@ -286,7 +285,7 @@ canvas { width: 100%; height: 100%; display: block; }
 .lb-rank { font-weight: 900; width: 30px; color: var(--purple); }
 .lb-ava { margin-right: 12px; font-size: 20px; }
 .lb-info { flex: 1; text-align: left; }
-.lb-info-name { font-weight: 800; size: 14px; }
+.lb-info-name { font-weight: 800; font-size: 14px; }
 .lb-info-sub { font-size: 11px; color: var(--neon); font-weight: 600; }
 .lb-score { font-weight: 900; color: #1e1b4b; }
 </style>
@@ -343,4 +342,367 @@ canvas { width: 100%; height: 100%; display: block; }
     <div class="overlay-card">
       <div class="overlay-title">PAUSED</div>
       <div class="menu-buttons" style="margin:0; gap:12px;">
-        <button class="btn btn-main" onclick="resumeGame
+        <button class="btn btn-main" onclick="resumeGame()">▶️ RESUME</button>
+        <button class="btn" onclick="quitGame()">🏠 MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popGameOver" class="overlay">
+    <div class="overlay-card">
+      <div class="overlay-title">GAME OVER</div>
+      <div class="stats-group">
+        <div class="stat-row"><span>Distance:</span><span class="stat-val" id="resDist">0m</span></div>
+        <div class="stat-row"><span>Coins Collected:</span><span class="stat-val" id="resCoins" style="color:var(--gold);">0</span></div>
+        <div class="stat-row"><span>Best Run:</span><span class="stat-val" id="resBest" style="color:var(--green);">0m</span></div>
+      </div>
+      <div class="menu-buttons" style="margin:0; gap:12px;">
+        <button class="btn btn-main" onclick="startGame()">🔄 TRY AGAIN</button>
+        <button class="btn" onclick="quitGame()">🏠 MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Message</div>
+</div>
+
+<script>
+// ══ AUDIO ENGINE (Procedural 8-Bit Retro Sounds & Loops) ══
+const AudioEngine = {
+  ctx: null,
+  bgmInterval: null,
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  },
+  playCoin() {
+    this.init(); let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, t); osc.frequency.setValueAtTime(880, t + 0.08);
+    gain.gain.setValueAtTime(0.08, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.3);
+  },
+  playJump() {
+    this.init(); let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(600, t + 0.15);
+    gain.gain.setValueAtTime(0.12, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.15);
+  },
+  playSlide() {
+    this.init(); let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(300, t); osc.frequency.linearRampToValueAtTime(100, t + 0.2);
+    gain.gain.setValueAtTime(0.12, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.2);
+  },
+  playGameOver() {
+    this.init(); this.stopBGM(); let t = this.ctx.currentTime;
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, t); osc.frequency.linearRampToValueAtTime(150, t + 0.2); osc.frequency.linearRampToValueAtTime(80, t + 0.5);
+    gain.gain.setValueAtTime(0.15, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.6);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.6);
+  },
+  playBGM() {
+    this.init(); this.stopBGM();
+    let notes = [261.63, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 293.66]; // Retro melody loop
+    let tempo = 180;
+    let step = 0;
+    
+    this.bgmInterval = setInterval(() => {
+      if (typeof gPaused !== 'undefined' && gPaused) return; 
+      let t = this.ctx.currentTime;
+      let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+      osc.type = 'square'; 
+      osc.frequency.setValueAtTime(notes[step % notes.length], t);
+      gain.gain.setValueAtTime(0.02, t); 
+      gain.gain.exponentialRampToValueAtTime(0.001, t + (tempo/1000));
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.start(t); osc.stop(t + (tempo/1000));
+      step++;
+    }, tempo);
+  },
+  stopBGM() {
+    if (this.bgmInterval) { clearInterval(this.bgmInterval); this.bgmInterval = null; }
+  }
+};
+
+// ══ DATA STATE ══
+let coins = parseInt(localStorage.getItem('dash_coins')) || 0;
+let best = parseInt(localStorage.getItem('dash_best')) || 0;
+let owned = JSON.parse(localStorage.getItem('dash_owned')) || { s1: true };
+let equipped = JSON.parse(localStorage.getItem('dash_equipped')) || { skin: 's1', gear: [] };
+
+const ITEMS = [
+  { id: 's1', name: 'Classic Pink', type: 'skin', icon: '🏃‍♀️', price: 0, color: '#EC4899' },
+  { id: 's2', name: 'Neon Cyber', type: 'skin', icon: '🤖', price: 15, color: '#06B6D4' },
+  { id: 's3', name: 'Golden Flash', type: 'skin', icon: '🦊', price: 40, color: '#F59E0B' },
+  { id: 's4', name: 'Void Shadow', type: 'skin', icon: '🥷', price: 75, color: '#312E81' },
+  { id: 'g1', name: 'Cool Shades', type: 'gear', icon: '🕶️', price: 10 },
+  { id: 'g2', name: 'Jetpack Cap', type: 'gear', icon: '🧢', price: 25 },
+  { id: 'g3', name: 'Golden Crown', type: 'gear', icon: '👑', price: 50 }
+];
+
+const LB = [
+  { rank: 1, name: 'SahanK_99', score: '2450m' },
+  { rank: 2, name: 'Dilshan_Dev', score: '1980m' },
+  { rank: 3, name: 'Dewmi Umegha', score: '0m', you: true },
+  { rank: 4, name: 'Kavindi_P', score: '1120m' },
+  { rank: 5, name: 'Nimna_X', score: '850m' }
+];
+
+// ══ GAME ENGINE ══
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let gRunning = false, gPaused = false;
+let distance = 0, sessionCoins = 0, speed = 4;
+let player, obstacles = [], baseLine, animId, frameCount = 0;
+
+function resizeCanvas() {
+  const w = canvas.parentElement.clientWidth;
+  const h = canvas.parentElement.clientHeight;
+  canvas.width = w; canvas.height = h;
+  baseLine = h * 0.75;
+  if(player) player.y = baseLine - player.h;
+}
+window.addEventListener('resize', resizeCanvas);
+
+class Player {
+  constructor() {
+    this.w = 34; this.h = 54;
+    this.x = 50; this.y = 0;
+    this.vy = 0; this.gravity = 0.6;
+    this.isJumping = false;
+    this.isSliding = false;
+    this.slideTimer = 0;
+  }
+  update() {
+    this.vy += this.gravity;
+    this.y += this.vy;
+    if (this.y >= baseLine - this.h) {
+      this.y = baseLine - this.h; this.vy = 0; this.isJumping = false;
+    }
+    if (this.isSliding) {
+      this.slideTimer--;
+      if (this.slideTimer <= 0) { this.isSliding = false; this.h = 54; this.y = baseLine - this.h; }
+    }
+  }
+  draw() {
+    const curSkin = ITEMS.find(i => i.id === equipped.skin);
+    ctx.fillStyle = curSkin ? curSkin.color : '#EC4899';
+    ctx.beginPath();
+    ctx.roundRect(this.x, this.y, this.w, this.h, this.isSliding ? 8 : 12);
+    ctx.fill();
+    
+    ctx.fillStyle = '#000';
+    if(this.isSliding) {
+      ctx.fillRect(this.x + 22, this.y + 10, 4, 4);
+    } else {
+      ctx.fillRect(this.x + 22, this.y + 12, 4, 4);
+      ctx.fillRect(this.x + 12, this.y + 12, 4, 4);
+    }
+
+    equipped.gear.forEach(gid => {
+      const g = ITEMS.find(i => i.id === gid);
+      if(g) {
+        ctx.font = "16px Inter";
+        if(g.id==='g1') ctx.fillText(g.icon, this.x + 14, this.y + 16);
+        if(g.id==='g2') ctx.fillText(g.icon, this.x + 8, this.y - 4); 
+        if(g.id==='g3') ctx.fillText(g.icon, this.x + 6, this.y - 8); 
+      }
+    });
+  }
+}
+
+class Obstacle {
+  constructor() {
+    this.type = Math.random() > 0.4 ? 'coin' : (Math.random() > 0.5 ? 'spike' : 'barrier');
+    this.x = canvas.width + 50;
+    this.active = true;
+    if (this.type === 'coin') { this.w = 16; this.h = 16; this.y = baseLine - 20 - Math.random() * 50; }
+    else if (this.type === 'spike') { this.w = 26; this.h = 30; this.y = baseLine - this.h; }
+    else { this.w = 24; this.h = 24; this.y = baseLine - 58; }
+  }
+  update() { this.x -= speed; if (this.x < -40) this.active = false; }
+  draw() {
+    if (this.type === 'coin') {
+      ctx.fillStyle = '#F59E0B'; ctx.beginPath(); ctx.arc(this.x + 8, this.y + 8, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFF'; ctx.font = "10px Inter"; ctx.fillText("$", this.x + 5, this.y + 11);
+    } else if (this.type === 'spike') {
+      ctx.fillStyle = '#EF4444'; ctx.beginPath();
+      ctx.moveTo(this.x, baseLine); ctx.lineTo(this.x + this.w / 2, this.y); ctx.lineTo(this.x + this.w, baseLine);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#3B82F6'; ctx.beginPath(); ctx.roundRect(this.x, this.y, this.w, this.h, 6); ctx.fill();
+    }
+  }
+}
+
+function doJump() {
+  if (!player.isJumping && !player.isSliding && gRunning && !gPaused) {
+    player.vy = -12; player.isJumping = true;
+    AudioEngine.playJump();
+  }
+}
+function doSlide(dir) {
+  if (dir === 1 && !player.isJumping && !player.isSliding && gRunning && !gPaused) {
+    player.isSliding = true; player.slideTimer = 45; player.h = 28; player.y = baseLine - player.h;
+    AudioEngine.playSlide();
+  }
+}
+
+function loop() {
+  if (!gRunning || gPaused) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = 'rgba(139,92,246,0.2)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, baseLine); ctx.lineTo(canvas.width, baseLine); ctx.stroke();
+  ctx.fillStyle = '#FAF5FF'; ctx.fillRect(0, baseLine + 2, canvas.width, canvas.height - baseLine);
+
+  distance++; speed = 4 + Math.floor(distance / 400);
+  document.getElementById('hudDist').innerText = Math.floor(distance / 10) + 'm';
+
+  player.update(); player.draw();
+
+  if (frameCount % 90 === 0) obstacles.push(new Obstacle());
+  frameCount++;
+
+  obstacles.forEach(o => {
+    o.update(); o.draw();
+    if (o.active && o.x < player.x + player.w && o.x + o.w > player.x && o.y < player.y + player.h && o.y + o.h > player.y) {
+      if (o.type === 'coin') {
+        o.active = false; sessionCoins++; coins++;
+        localStorage.setItem('dash_coins', coins);
+        document.getElementById('hudCoins').innerText = sessionCoins;
+        AudioEngine.playCoin();
+      } else {
+        endGame();
+      }
+    }
+  });
+  obstacles = obstacles.filter(o => o.active);
+  animId = requestAnimationFrame(loop);
+}
+
+// ══ APP INTERACTION FLUIDITY ══
+function toast(msg) {
+  const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function openShop() {
+  document.getElementById('shopCoins').innerText = coins; switchTab('skin'); showScreen('scrShop');
+}
+function closeShop() { showScreen('scrHome'); }
+function openLB() {
+  const me = LB.find(r => r.you); if (me) me.score = best + 'm';
+  LB.sort((a, b) => parseInt(b.score) - parseInt(a.score)).forEach((r, i) => r.rank = i + 1);
+  document.getElementById('lbList').innerHTML = LB.map(r => `
+    <div class="lb-row${r.you ? ' lb-you' : ''}">
+      <div class="lb-rank">${r.rank}</div>
+      <div class="lb-ava">${r.you ? '⭐' : '🏃'}</div>
+      <div class="lb-info">
+        <div class="lb-info-name">${r.name}</div>
+        ${r.you ? '<div class="lb-info-sub">Your best personal score</div>' : ''}
+      </div>
+      <div class="lb-score">${r.score}</div>
+    </div>`).join('');
+  showScreen('scrLB');
+}
+function closeLB() { showScreen('scrHome'); }
+
+function switchTab(cat) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const filtered = ITEMS.filter(i => i.type === cat);
+  document.getElementById('shopGrid').innerHTML = filtered.map(item => {
+    let btnHtml = '';
+    if (owned[item.id]) {
+      const isEq = (item.type === 'skin' ? equipped.skin === item.id : equipped.gear.includes(item.id));
+      btnHtml = `<button class="btn-buy" style="background:#E2E8F0;" onclick="equipItem('${item.id}','${item.type}')">${isEq ? 'EQUIPPED' : 'EQUIP'}</button>`;
+    } else {
+      btnHtml = `<button class="btn-buy" style="background:var(--neon);color:white;" onclick="buyItem('${item.id}')">BUY</button>`;
+    }
+    return `
+      <div class="shop-item">
+        <div class="item-ico">${item.icon}</div>
+        <div class="item-nm">${item.name}</div>
+        <div class="item-pr">${item.price === 0 ? 'Free' : '🪙 ' + item.price}</div>
+        ${btnHtml}
+      </div>`;
+  }).join('');
+}
+
+function buyItem(id) {
+  const item = ITEMS.find(i => i.id === id);
+  if (coins >= item.price) {
+    coins -= item.price; owned[id] = true;
+    localStorage.setItem('dash_coins', coins);
+    localStorage.setItem('dash_owned', JSON.stringify(owned));
+    document.getElementById('shopCoins').innerText = coins;
+    toast(item.name + ' purchased!'); switchTab(item.type);
+  } else { toast('Not enough coins!'); }
+}
+function equipItem(id, cat) {
+  if (cat === 'skin') equipped.skin = id;
+  else {
+    const idx = equipped.gear.indexOf(id);
+    if (idx > -1) equipped.gear.splice(idx, 1); else equipped.gear.push(id);
+  }
+  localStorage.setItem('dash_equipped', JSON.stringify(equipped));
+  toast('Equipment updated!'); switchTab(cat);
+}
+
+// ══ CONTROL FLOWS ══
+function startGame() {
+  AudioEngine.init();
+  AudioEngine.playBGM(); 
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('popGameOver').style.display = 'none';
+  showScreen('scrHome'); document.getElementById('scrHome').classList.remove('active'); 
+  gRunning = true; gPaused = false; distance = 0; sessionCoins = 0; obstacles = []; frameCount = 0;
+  document.getElementById('hudCoins').innerText = '0';
+  player = new Player(); resizeCanvas(); loop();
+}
+function pauseGame() { gPaused = true; document.getElementById('popPause').style.display = 'flex'; }
+function resumeGame() { gPaused = false; document.getElementById('popPause').style.display = 'none'; loop(); }
+function quitGame() {
+  gRunning = false; gPaused = false; cancelAnimationFrame(animId);
+  AudioEngine.stopBGM(); 
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('popPause').style.display = 'none';
+  document.getElementById('popGameOver').style.display = 'none';
+  ctx.clearRect(0, 0, canvas.width, canvas.height); showScreen('scrHome');
+}
+function endGame() {
+  gRunning = false; cancelAnimationFrame(animId);
+  AudioEngine.playGameOver();
+  let finalDist = Math.floor(distance / 10);
+  if (finalDist > best) { best = finalDist; localStorage.setItem('dash_best', best); }
+  document.getElementById('resDist').innerText = finalDist + 'm';
+  document.getElementById('resCoins').innerText = sessionCoins;
+  document.getElementById('resBest').innerText = best + 'm';
+  document.getElementById('popGameOver').style.display = 'flex';
+}
+
+// Input Touch Triggers
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+  if (e.code === 'ArrowDown') { e.preventDefault(); doSlide(1); }
+});
+let tsY = 0;
+canvas.addEventListener('touchstart', e => { tsY = e.touches[0].clientY; e.preventDefault(); }, { passive: false });
+canvas.addEventListener('touchend', e => {
+  let teY = e.changedTouches[0].clientY;
+  if (tsY - teY > 30) doJump();
+  else if (teY - tsY > 30) doSlide(1);
+}, { passive: false });
+
+resizeCanvas();
+</script>
+</body>
+</html>
